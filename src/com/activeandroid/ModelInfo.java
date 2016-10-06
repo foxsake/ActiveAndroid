@@ -189,6 +189,10 @@ final class ModelInfo {
 					@SuppressWarnings("unchecked")
 					Class<? extends Model> modelClass = (Class<? extends Model>) discoveredClass;
 					mTableInfos.put(modelClass, new TableInfo(modelClass));
+					Class<? extends Model>[] inner = (Class<? extends Model>[]) modelClass.getDeclaredClasses();
+					for(Class<? extends Model> inModel : inner){
+						mTableInfos.put(inModel, new TableInfo(inModel));
+					}
 				}
 				else if (ReflectionUtils.isTypeSerializer(discoveredClass)) {
 					TypeSerializer instance = (TypeSerializer) discoveredClass.newInstance();
