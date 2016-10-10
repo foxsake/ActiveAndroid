@@ -30,6 +30,8 @@ import com.activeandroid.util.ReflectionUtils;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
@@ -43,6 +45,15 @@ public abstract class Model {
 	//////////////////////////////////////////////////////////////////////////////////////
 
 	protected Long mId = null;
+        protected abstract void constraints();
+        protected Map<String, String> errors;
+
+        protected boolean isValid(){
+            errors = new HashMap();
+            constraints();
+            return errors.isEmpty();
+        }
+
 	//////////////////////////////////////////////////////////////////////////////////////
 	// PRIVATE MEMBERS
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -74,14 +85,23 @@ public abstract class Model {
 				.notifyChange(ContentProvider.createUri(mTableInfo.getType(), mId), null);
 	}
 
+        public final boolean validateAndSave(){
+            if(isValid()){
+                save();
+                return true;
+            }
+            return false;
+        }
+
 	public final Long save() {
 		final SQLiteDatabase db = Cache.openDatabase();
 		final ContentValues values = new ContentValues();
 
 		for (Field field : mTableInfo.getFields()) {
 			final String fieldName = mTableInfo.getColumnName(field);
+                        if(fieldName.isEmpty())
+                            continue;
 			Class<?> fieldType = field.getType();
-
 			field.setAccessible(true);
 
 			try {
