@@ -20,6 +20,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.activeandroid.ActiveAndroid;
 import com.activeandroid.content.ContentProvider;
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
@@ -192,6 +193,16 @@ public abstract class Model {
 		TableInfo tableInfo = Cache.getTableInfo(type);
 		new Delete().from(type).where(tableInfo.getIdName()+"=?", id).execute();
 	}
+
+        public static void truncate(Class<? extends Model> type){
+            TableInfo tableInfo = Cache.getTableInfo(type);
+            ActiveAndroid.execSQL(
+                    String.format("DELETE FROM %s;",
+                        tableInfo.getTableName()));
+            ActiveAndroid.execSQL(
+                    String.format("DELETE FROM sqlite_sequence WHERE name='%s';",
+                        tableInfo.getTableName()));
+        }
 
 	public static <T extends Model> T load(Class<T> type, long id) {
 		TableInfo tableInfo = Cache.getTableInfo(type);
